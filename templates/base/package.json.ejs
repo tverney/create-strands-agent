@@ -7,7 +7,10 @@
     "dev": "tsx watch src/index.ts",
     "build": "tsc",
     "start": "node dist/index.js",
-    "lint": "eslint src/"
+    "lint": "eslint src/",
+    "lint:fix": "eslint src/ --fix",
+    "format": "prettier --write src/",
+    "format:check": "prettier --check src/"
   },
   "dependencies": {
     "@strands-agents/sdk": "<%= strandsVersion %>",
@@ -25,6 +28,9 @@
     "eslint": "^9.27.0",
     "@typescript-eslint/eslint-plugin": "^8.0.0",
     "@typescript-eslint/parser": "^8.0.0",
+    "eslint-config-prettier": "^10.1.0",
+    "eslint-plugin-prettier": "^5.4.0",
+    "prettier": "^3.5.0",
     "tsx": "^4.19.0"<% if (hasA2A || hasAgentCore) { %>,
     "@types/express": "^5.0.0"<% } %>
   },

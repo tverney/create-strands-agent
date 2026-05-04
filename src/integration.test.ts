@@ -39,7 +39,8 @@ const BASE_FILES = [
   'tsconfig.json',
   '.env.example',
   '.gitignore',
-  '.eslintrc.json',
+  'eslint.config.js',
+  '.prettierrc',
   'README.md',
   'src/index.ts',
 ];

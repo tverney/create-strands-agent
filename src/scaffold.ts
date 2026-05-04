@@ -60,8 +60,12 @@ export const TEMPLATE_MANIFEST: TemplateManifest = [
     outputPath: '.gitignore',
   },
   {
-    templatePath: 'base/.eslintrc.json.ejs',
-    outputPath: '.eslintrc.json',
+    templatePath: 'base/eslint.config.js.ejs',
+    outputPath: 'eslint.config.js',
+  },
+  {
+    templatePath: 'base/.prettierrc.ejs',
+    outputPath: '.prettierrc',
   },
   {
     templatePath: 'base/README.md.ejs',

@@ -54,6 +54,9 @@ const BASE_DEV_DEPS = [
   'eslint',
   '@typescript-eslint/eslint-plugin',
   '@typescript-eslint/parser',
+  'eslint-config-prettier',
+  'eslint-plugin-prettier',
+  'prettier',
   'tsx',
 ];
 
