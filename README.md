@@ -128,7 +128,8 @@ my-agent/
 │   └── agentcore-config.json     # AgentCore configuration
 ├── package.json
 ├── tsconfig.json
-├── .eslintrc.json
+├── eslint.config.js
+├── .prettierrc
 ├── .env.example
 ├── .gitignore
 └── README.md
@@ -144,8 +145,11 @@ Every generated project includes these npm scripts:
 |--------|---------|-------------|
 | `dev` | `tsx watch src/index.ts` | Run the agent in development mode with hot-reload |
 | `build` | `tsc` | Compile TypeScript to JavaScript |
-| `start` | `node dist/index.ts` | Run the compiled agent in production mode |
+| `start` | `node dist/index.js` | Run the compiled agent in production mode |
 | `lint` | `eslint src/` | Run ESLint on the project source |
+| `lint:fix` | `eslint src/ --fix` | Lint and auto-fix issues |
+| `format` | `prettier --write src/` | Format code with Prettier |
+| `format:check` | `prettier --check src/` | Check formatting without changes |
 
 ## Requirements
 
