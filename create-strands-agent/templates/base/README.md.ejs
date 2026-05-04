@@ -1,0 +1,103 @@
+# <%= projectName %>
+
+A TypeScript AI agent built with the [Strands Agents SDK](https://strandsagents.com).
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js >= <%= nodeVersion %>
+- An AWS account with Bedrock access (for the default model provider)
+
+### Setup
+
+1. Install dependencies:
+
+   ```bash
+   npm install
+   ```
+
+2. Copy the environment file and fill in your credentials:
+
+   ```bash
+   cp .env.example .env
+   ```
+
+3. Run the agent in development mode:
+
+   ```bash
+   npm run dev
+   ```
+
+## Scripts
+
+| Command         | Description                                  |
+| --------------- | -------------------------------------------- |
+| `npm run dev`   | Run the agent in development mode (hot-reload) |
+| `npm run build` | Compile TypeScript to JavaScript             |
+| `npm start`     | Run the compiled agent in production mode    |
+| `npm run lint`  | Lint the source code with ESLint             |
+<% if (hasMemory) { %>
+## Memory Module
+
+This project includes agent memory support. The memory module provides a local
+file-based store for development. See `src/memory/` for the implementation.
+
+To swap the memory provider for production, edit `src/memory/provider.ts` and
+replace the local store with a persistent backend (e.g., DynamoDB, Redis).
+<% } %>
+<% if (hasGuardrails) { %>
+## Guardrails Module
+
+This project includes input and output guardrails. Example guardrails are
+provided in `src/guardrails/` to demonstrate content validation and response
+filtering.
+
+To add custom guardrails, create new files in `src/guardrails/` and register
+them in `src/guardrails/index.ts`.
+<% } %>
+<% if (hasA2A) { %>
+## A2A Protocol Module
+
+This project includes [Agent-to-Agent (A2A)](https://github.com/a2aproject/a2a-js)
+protocol support. The A2A server exposes your agent for communication with other
+A2A-compatible agents.
+
+- Agent card: `src/a2a/agent-card.json`
+- Server entry point: `src/a2a/server.ts`
+
+Start the A2A server:
+
+```bash
+npx tsx src/a2a/server.ts
+```
+<% } %>
+<% if (hasAgentCore) { %>
+## AgentCore Deployment
+
+This project includes AWS AgentCore deployment configuration. See the
+`deployment/` directory for Docker and deployment scripts.
+
+### Deploy to AgentCore
+
+1. Ensure you have the AWS CLI configured with appropriate permissions.
+2. Build the Docker image:
+
+   ```bash
+   docker build -f deployment/Dockerfile -t <%= projectName %> .
+   ```
+
+3. Run the deployment script:
+
+   ```bash
+   bash deployment/deploy.sh
+   ```
+
+See `deployment/deploy.sh` for required AWS permissions and prerequisites.
+<% } %>
+
+## Documentation
+
+- [Strands Agents SDK — TypeScript Quickstart](https://strandsagents.com/docs/user-guide/quickstart/typescript/)
+- [Strands Agents SDK — API Reference](https://strandsagents.com/docs/api-reference/)
+- [Strands Agents SDK — GitHub](https://github.com/strands-agents/sdk-typescript)

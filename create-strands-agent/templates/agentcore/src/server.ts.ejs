@@ -1,0 +1,61 @@
+import 'dotenv/config';
+import express from 'express';
+import { Agent } from '@strands-agents/sdk';
+
+/**
+ * AgentCore HTTP server.
+ *
+ * Exposes two endpoints required by AWS AgentCore:
+ *   - GET  /ping         — Health check (returns 200)
+ *   - POST /invocations  — Agent invocation (accepts JSON body with `prompt`)
+ *
+ * ──────────────────────────────────────────────────────────────────────────────
+ * Customization:
+ *
+ *   - Modify the `agent` configuration below to add tools, change the model,
+ *     or update the system prompt.
+ *   - Add middleware for authentication, logging, or rate limiting as needed.
+ *   - The PORT defaults to 8080 to match AgentCore's expected container port.
+ * ──────────────────────────────────────────────────────────────────────────────
+ */
+
+const PORT = parseInt(process.env.PORT ?? '8080', 10);
+
+const app = express();
+app.use(express.json());
+
+const agent = new Agent({
+  systemPrompt: 'You are a helpful AI assistant deployed on AWS AgentCore.',
+});
+
+/**
+ * Health check endpoint — AgentCore pings this to verify the container is ready.
+ */
+app.get('/ping', (_req, res) => {
+  res.status(200).json({ status: 'ok' });
+});
+
+/**
+ * Agent invocation endpoint — receives a prompt and returns the agent's response.
+ */
+app.post('/invocations', async (req, res) => {
+  try {
+    const { prompt } = req.body as { prompt?: string };
+
+    if (!prompt || typeof prompt !== 'string') {
+      res.status(400).json({ error: 'Request body must include a "prompt" string.' });
+      return;
+    }
+
+    const result = await agent.invoke(prompt);
+    res.status(200).json({ response: String(result) });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    console.error('Invocation error:', message);
+    res.status(500).json({ error: 'Internal server error.' });
+  }
+});
+
+app.listen(PORT, () => {
+  console.log(`AgentCore server listening on port ${PORT}`);
+});

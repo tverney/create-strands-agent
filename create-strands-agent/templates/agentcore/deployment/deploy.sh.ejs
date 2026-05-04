@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# ──────────────────────────────────────────────────────────────────────────────
+# AgentCore Deployment Script — <%= projectName %>
+#
+# Prerequisites:
+#   - AWS CLI v2 installed and configured
+#   - Docker installed and running
+#   - Appropriate AWS IAM permissions:
+#       • ecr:CreateRepository, ecr:GetAuthorizationToken
+#       • ecr:BatchCheckLayerAvailability, ecr:PutImage
+#       • bedrock:CreateAgent, bedrock:UpdateAgent
+#       • iam:PassRole (for the AgentCore execution role)
+#
+# Usage:
+#   bash deployment/deploy.sh
+#
+# Environment variables (set in .env or export before running):
+#   AGENTCORE_REGION   — AWS region for deployment (default: us-east-1)
+#   AGENTCORE_AGENT_NAME — Name for the deployed agent
+# ──────────────────────────────────────────────────────────────────────────────
+
+REGION="${AGENTCORE_REGION:-us-east-1}"
+AGENT_NAME="${AGENTCORE_AGENT_NAME:-<%= projectName %>}"
+ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+ECR_REPO="${AGENT_NAME}"
+IMAGE_TAG="latest"
+ECR_URI="${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com/${ECR_REPO}:${IMAGE_TAG}"
+
+echo "🚀 Deploying ${AGENT_NAME} to AgentCore in ${REGION}..."
+
+# 1. Create ECR repository (ignore if it already exists)
+aws ecr describe-repositories --repository-names "${ECR_REPO}" --region "${REGION}" 2>/dev/null || \
+  aws ecr create-repository --repository-name "${ECR_REPO}" --region "${REGION}"
+
+# 2. Authenticate Docker with ECR
+aws ecr get-login-password --region "${REGION}" | \
+  docker login --username AWS --password-stdin "${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com"
+
+# 3. Build and push the Docker image
+docker build -f deployment/Dockerfile -t "${ECR_REPO}:${IMAGE_TAG}" .
+docker tag "${ECR_REPO}:${IMAGE_TAG}" "${ECR_URI}"
+docker push "${ECR_URI}"
+
+echo "✅ Image pushed to ${ECR_URI}"
+echo ""
+echo "Next steps:"
+echo "  1. Register the agent with AgentCore using the AWS console or CLI."
+echo "  2. Set the container image URI to: ${ECR_URI}"
+echo "  3. Configure environment variables in the AgentCore console."

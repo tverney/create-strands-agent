@@ -1,0 +1,26 @@
+import 'dotenv/config';
+import { Agent } from '@strands-agents/sdk';
+<% if (hasMemory) { %>import { memory } from './memory/index.js';
+<% } %><% if (hasGuardrails) { %>import { guardrails } from './guardrails/index.js';
+<% } %>
+/**
+ * <%= projectName %> — A Strands Agents TypeScript project.
+ *
+ * This is the main entry point. Customize the agent's tools, model,
+ * and system prompt below to build your AI agent.
+ */
+
+async function main(): Promise<void> {
+  const agent = new Agent({
+    // Add your tools here, e.g.:
+    // tools: [myTool],
+    systemPrompt: 'You are a helpful AI assistant.',<% if (hasMemory) { %>
+    memory,<% } %><% if (hasGuardrails) { %>
+    ...guardrails,<% } %>
+  });
+
+  const result = await agent.invoke('Hello! What can you help me with?');
+  console.log(result);
+}
+
+main().catch(console.error);

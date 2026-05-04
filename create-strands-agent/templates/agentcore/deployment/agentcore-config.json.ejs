@@ -1,0 +1,11 @@
+{
+  "agentName": "<%= projectName %>",
+  "runtime": "nodejs20.x",
+  "handler": "dist/server.js",
+  "memorySize": 512,
+  "timeout": 300,
+  "environment": {
+    "NODE_ENV": "production",
+    "STRANDS_MODEL_ID": "us.anthropic.claude-sonnet-4-20250514"
+  }
+}

@@ -1,0 +1,36 @@
+/**
+ * Example output guardrail — response filtering.
+ *
+ * This guardrail checks the agent's response before it is returned to the user.
+ * Use it as a starting point for your own output filtering logic.
+ */
+
+export interface GuardrailResult {
+  passed: boolean;
+  message?: string;
+}
+
+/**
+ * Filter the agent's response to ensure it does not contain sensitive patterns.
+ *
+ * @param output - The agent's response string.
+ * @returns A guardrail result indicating whether the output is acceptable.
+ */
+export function filterResponse(output: string): GuardrailResult {
+  // Example: reject responses that appear to contain API keys or secrets.
+  const sensitivePatterns = [
+    /\bAKIA[0-9A-Z]{16}\b/,   // AWS access key ID pattern
+    /\bsk-[a-zA-Z0-9]{32,}\b/, // Common API key pattern
+  ];
+
+  for (const pattern of sensitivePatterns) {
+    if (pattern.test(output)) {
+      return {
+        passed: false,
+        message: 'Response may contain sensitive information and has been blocked.',
+      };
+    }
+  }
+
+  return { passed: true };
+}

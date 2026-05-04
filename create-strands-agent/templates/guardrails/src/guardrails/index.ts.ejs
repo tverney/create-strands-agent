@@ -1,0 +1,31 @@
+/**
+ * Guardrails module — registration and export.
+ *
+ * This module registers input and output guardrails with the Strands agent.
+ * Guardrails run before and after each agent invocation to enforce safety
+ * and quality constraints.
+ *
+ * ──────────────────────────────────────────────────────────────────────────────
+ * Adding custom guardrails:
+ *
+ *   1. Create a new file in this directory (e.g., `my-guardrail.ts`).
+ *   2. Export a guardrail function that accepts the input/output and returns
+ *      a validation result.
+ *   3. Add it to the `inputGuardrails` or `outputGuardrails` array below.
+ *
+ *   Example:
+ *     import { myCustomGuardrail } from './my-guardrail.js';
+ *     const inputGuardrails = [validateContent, myCustomGuardrail];
+ * ──────────────────────────────────────────────────────────────────────────────
+ */
+
+import { validateContent } from './input-guardrail.js';
+import { filterResponse } from './output-guardrail.js';
+
+const inputGuardrails = [validateContent];
+const outputGuardrails = [filterResponse];
+
+export const guardrails = {
+  inputGuardrails,
+  outputGuardrails,
+};

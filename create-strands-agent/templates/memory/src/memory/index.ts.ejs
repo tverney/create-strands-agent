@@ -1,0 +1,24 @@
+/**
+ * Memory module — initialization and export.
+ *
+ * This module configures agent memory so your agent can persist and recall
+ * context across interactions.
+ *
+ * ──────────────────────────────────────────────────────────────────────────────
+ * Swapping the memory provider for production:
+ *
+ *   The default provider is a local file-based store suitable for development.
+ *   For production, replace it with a persistent backend such as DynamoDB,
+ *   Redis, or any store that implements the Strands memory interface.
+ *
+ *   Example:
+ *     import { DynamoDBMemoryProvider } from './dynamodb-provider.js';
+ *     const provider = new DynamoDBMemoryProvider({ tableName: 'agent-memory' });
+ * ──────────────────────────────────────────────────────────────────────────────
+ */
+
+import { LocalFileMemoryProvider } from './provider.js';
+
+const provider = new LocalFileMemoryProvider();
+
+export const memory = provider;

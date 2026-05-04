@@ -1,0 +1,55 @@
+import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs';
+import { join } from 'node:path';
+
+/**
+ * Local file-based memory provider for development.
+ *
+ * Stores conversation history as JSON files in a `.memory/` directory
+ * at the project root. This is NOT suitable for production — see
+ * `index.ts` for instructions on swapping to a persistent backend.
+ */
+
+const MEMORY_DIR = '.memory';
+
+export class LocalFileMemoryProvider {
+  private memoryDir: string;
+
+  constructor(baseDir: string = process.cwd()) {
+    this.memoryDir = join(baseDir, MEMORY_DIR);
+    if (!existsSync(this.memoryDir)) {
+      mkdirSync(this.memoryDir, { recursive: true });
+    }
+  }
+
+  /**
+   * Retrieve stored memory for a given session.
+   */
+  get(sessionId: string): Record<string, unknown>[] {
+    const filePath = join(this.memoryDir, `${sessionId}.json`);
+    if (!existsSync(filePath)) {
+      return [];
+    }
+    const raw = readFileSync(filePath, 'utf-8');
+    return JSON.parse(raw) as Record<string, unknown>[];
+  }
+
+  /**
+   * Append an entry to the memory for a given session.
+   */
+  append(sessionId: string, entry: Record<string, unknown>): void {
+    const existing = this.get(sessionId);
+    existing.push(entry);
+    const filePath = join(this.memoryDir, `${sessionId}.json`);
+    writeFileSync(filePath, JSON.stringify(existing, null, 2), 'utf-8');
+  }
+
+  /**
+   * Clear all memory for a given session.
+   */
+  clear(sessionId: string): void {
+    const filePath = join(this.memoryDir, `${sessionId}.json`);
+    if (existsSync(filePath)) {
+      writeFileSync(filePath, '[]', 'utf-8');
+    }
+  }
+}

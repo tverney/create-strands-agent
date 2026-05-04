@@ -1,0 +1,42 @@
+import 'dotenv/config';
+import { Agent } from '@strands-agents/sdk';
+import { createServer } from '@a2a-js/server';
+import agentCard from './agent-card.json' with { type: 'json' };
+
+/**
+ * A2A server entry point.
+ *
+ * Exposes the Strands agent over the Agent-to-Agent (A2A) protocol so that
+ * other A2A-compatible agents can discover and communicate with it.
+ *
+ * ──────────────────────────────────────────────────────────────────────────────
+ * Customization:
+ *
+ *   - Edit `agent-card.json` to update the agent's name, description,
+ *     capabilities, and skills.
+ *   - Modify the `agent` configuration below to add tools, change the model,
+ *     or update the system prompt.
+ *   - Change the port by setting the PORT environment variable.
+ * ──────────────────────────────────────────────────────────────────────────────
+ */
+
+const PORT = parseInt(process.env.PORT ?? '3000', 10);
+
+const agent = new Agent({
+  systemPrompt: 'You are a helpful AI assistant exposed via the A2A protocol.',
+});
+
+async function handleTask(input: string): Promise<string> {
+  const result = await agent.invoke(input);
+  return String(result);
+}
+
+const server = createServer({
+  agentCard,
+  handler: handleTask,
+});
+
+server.listen(PORT, () => {
+  console.log(`A2A server running at http://localhost:${PORT}`);
+  console.log(`Agent card available at http://localhost:${PORT}/.well-known/agent.json`);
+});

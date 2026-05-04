@@ -1,0 +1,51 @@
+{
+  "name": "create-strands-agent",
+  "version": "0.1.0",
+  "description": "Scaffolding CLI tool for creating Strands Agents TypeScript projects",
+  "type": "module",
+  "bin": {
+    "create-strands-agent": "./bin/create-strands-agent.js"
+  },
+  "main": "./dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "lint": "eslint src/",
+    "test": "vitest --run",
+    "test:watch": "vitest"
+  },
+  "keywords": [
+    "strands",
+    "agents",
+    "scaffolding",
+    "cli",
+    "typescript"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "files": [
+    "dist",
+    "bin",
+    "templates"
+  ],
+  "dependencies": {
+    "chalk": "^5.4.1",
+    "commander": "^13.1.0",
+    "@inquirer/prompts": "^7.5.0",
+    "dotenv": "^16.5.0",
+    "ejs": "^3.1.10",
+    "ora": "^8.2.0"
+  },
+  "devDependencies": {
+    "@types/ejs": "^3.1.5",
+    "@types/node": "^22.15.0",
+    "eslint": "^9.27.0",
+    "fast-check": "^4.1.1",
+    "tsx": "^4.19.0",
+    "typescript": "^5.8.0",
+    "vitest": "^3.2.1"
+  }
+}

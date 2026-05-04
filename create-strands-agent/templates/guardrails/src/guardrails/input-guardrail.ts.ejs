@@ -1,0 +1,33 @@
+/**
+ * Example input guardrail — content validation.
+ *
+ * This guardrail checks the user's input before it reaches the agent.
+ * Use it as a starting point for your own input validation logic.
+ */
+
+export interface GuardrailResult {
+  passed: boolean;
+  message?: string;
+}
+
+/**
+ * Validate that the input content is non-empty and within a reasonable length.
+ *
+ * @param input - The raw user input string.
+ * @returns A guardrail result indicating whether the input is acceptable.
+ */
+export function validateContent(input: string): GuardrailResult {
+  if (!input || input.trim().length === 0) {
+    return { passed: false, message: 'Input must not be empty.' };
+  }
+
+  const MAX_INPUT_LENGTH = 10_000;
+  if (input.length > MAX_INPUT_LENGTH) {
+    return {
+      passed: false,
+      message: `Input exceeds maximum length of ${MAX_INPUT_LENGTH} characters.`,
+    };
+  }
+
+  return { passed: true };
+}
