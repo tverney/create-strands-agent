@@ -1,8 +1,9 @@
 {
   "name": "<%= projectName %>",
   "description": "A Strands AI agent exposed via the A2A protocol.",
-  "url": "http://localhost:3000",
+  "protocolVersion": "0.3.0",
   "version": "0.1.0",
+  "url": "http://localhost:3000/a2a/jsonrpc",
   "capabilities": {
     "streaming": false,
     "pushNotifications": false
@@ -11,7 +12,10 @@
     {
       "id": "general-assistant",
       "name": "General Assistant",
-      "description": "A general-purpose AI assistant powered by Strands Agents SDK."
+      "description": "A general-purpose AI assistant powered by Strands Agents SDK.",
+      "tags": ["chat", "assistant"]
     }
-  ]
+  ],
+  "defaultInputModes": ["text"],
+  "defaultOutputModes": ["text"]
 }

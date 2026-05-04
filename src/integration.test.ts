@@ -9,7 +9,7 @@
  *   4. Runs `tsc --noEmit` to verify zero TypeScript compilation errors
  *
  * Type stubs are used instead of real npm install because:
- *   - Some packages (e.g., @a2a-js/server) may not exist on the public registry
+ *   - Some packages may have different type definitions than expected
  *   - The SDK's type definitions may not match the template's usage exactly
  *   - Tests should be deterministic and not depend on network access
  *
@@ -190,23 +190,92 @@ export function config(options?: unknown): unknown;
   // ── Conditional dependencies ───────────────────────────────────────
 
   if (selectedModules.has('a2a')) {
-    await createStubPackage(
-      projectDir,
-      '@a2a-js/server',
+    // @a2a-js/sdk — main package
+    const a2aSdkDir = join(nodeModulesDir, '@a2a-js', 'sdk');
+    await mkdir(a2aSdkDir, { recursive: true });
+    await fsWriteFile(
+      join(a2aSdkDir, 'package.json'),
+      JSON.stringify({ name: '@a2a-js/sdk', version: '0.3.13', types: 'index.d.ts' }),
+    );
+    await fsWriteFile(
+      join(a2aSdkDir, 'index.d.ts'),
       `
-export interface A2AServerConfig {
-  agentCard: unknown;
-  handler: (input: string) => Promise<string>;
+export interface AgentCard {
+  name: string;
+  description: string;
+  protocolVersion: string;
+  version: string;
+  url: string;
+  capabilities?: Record<string, unknown>;
+  skills?: unknown[];
+  defaultInputModes?: string[];
+  defaultOutputModes?: string[];
+  additionalInterfaces?: Array<{ url: string; transport: string }>;
+  [key: string]: unknown;
 }
-export interface A2AServer {
-  listen(port: number, callback?: () => void): void;
+export interface MessagePart { kind: string; text?: string; [key: string]: unknown; }
+export interface Message {
+  kind: 'message';
+  messageId: string;
+  role: string;
+  parts: MessagePart[];
+  contextId?: string;
 }
-export function createServer(config: A2AServerConfig): A2AServer;
+export const AGENT_CARD_PATH: string;
 `,
     );
-  }
 
-  if (selectedModules.has('agentcore')) {
+    // @a2a-js/sdk/server
+    const a2aServerDir = join(a2aSdkDir, 'server');
+    await mkdir(a2aServerDir, { recursive: true });
+    await fsWriteFile(
+      join(a2aServerDir, 'package.json'),
+      JSON.stringify({ name: '@a2a-js/sdk/server', version: '0.3.13', types: 'index.d.ts' }),
+    );
+    await fsWriteFile(
+      join(a2aServerDir, 'index.d.ts'),
+      `
+export interface RequestContext {
+  taskId: string;
+  contextId: string;
+  userMessage: { parts: Array<{ kind: string; text?: string }> };
+  task?: unknown;
+}
+export interface ExecutionEventBus {
+  publish(event: unknown): void;
+  finished(): void;
+}
+export interface AgentExecutor {
+  execute(ctx: RequestContext, bus: ExecutionEventBus): Promise<void>;
+  cancelTask?: () => Promise<void>;
+}
+export class DefaultRequestHandler {
+  constructor(card: unknown, store: unknown, executor: unknown);
+}
+export class InMemoryTaskStore {
+  constructor();
+}
+`,
+    );
+
+    // @a2a-js/sdk/server/express
+    const a2aExpressDir = join(a2aServerDir, 'express');
+    await mkdir(a2aExpressDir, { recursive: true });
+    await fsWriteFile(
+      join(a2aExpressDir, 'package.json'),
+      JSON.stringify({ name: '@a2a-js/sdk/server/express', version: '0.3.13', types: 'index.d.ts' }),
+    );
+    await fsWriteFile(
+      join(a2aExpressDir, 'index.d.ts'),
+      `
+export function agentCardHandler(config: unknown): unknown;
+export function jsonRpcHandler(config: unknown): unknown;
+export function restHandler(config: unknown): unknown;
+export const UserBuilder: { noAuthentication: unknown };
+`,
+    );
+
+    // express (also needed for A2A)
     await createStubPackage(
       projectDir,
       'express',
@@ -214,20 +283,11 @@ export function createServer(config: A2AServerConfig): A2AServer;
 import { Server } from 'http';
 declare function express(): express.Application;
 declare namespace express {
-  interface Request {
-    body: any;
-    params: any;
-    query: any;
-  }
-  interface Response {
-    status(code: number): Response;
-    json(body: unknown): Response;
-  }
-  interface NextFunction {
-    (err?: unknown): void;
-  }
+  interface Request { body: any; params: any; query: any; }
+  interface Response { status(code: number): Response; json(body: unknown): Response; }
+  interface NextFunction { (err?: unknown): void; }
   interface Application {
-    use(handler: unknown): Application;
+    use(...args: unknown[]): Application;
     get(path: string, handler: (req: Request, res: Response) => void): Application;
     post(path: string, handler: (req: Request, res: Response) => void | Promise<void>): Application;
     listen(port: number, callback?: () => void): Server;
@@ -246,6 +306,60 @@ import express from 'express';
 export = express;
 `,
     );
+
+    // uuid
+    await createStubPackage(
+      projectDir,
+      'uuid',
+      `
+export function v4(): string;
+`,
+    );
+  }
+
+  if (selectedModules.has('agentcore')) {
+    // express — only create if not already created by A2A
+    if (!selectedModules.has('a2a')) {
+      await createStubPackage(
+        projectDir,
+        'express',
+        `
+import { Server } from 'http';
+declare function express(): express.Application;
+declare namespace express {
+  interface Request {
+    body: any;
+    params: any;
+    query: any;
+  }
+  interface Response {
+    status(code: number): Response;
+    json(body: unknown): Response;
+  }
+  interface NextFunction {
+    (err?: unknown): void;
+  }
+  interface Application {
+    use(...args: unknown[]): Application;
+    get(path: string, handler: (req: Request, res: Response) => void): Application;
+    post(path: string, handler: (req: Request, res: Response) => void | Promise<void>): Application;
+    listen(port: number, callback?: () => void): Server;
+  }
+  function json(): unknown;
+}
+export = express;
+`,
+      );
+
+      await createStubPackage(
+        projectDir,
+        '@types/express',
+        `
+import express from 'express';
+export = express;
+`,
+      );
+    }
 
     await createStubPackage(
       projectDir,
@@ -402,7 +516,7 @@ describe('Integration: scaffold with all modules', { timeout: 60_000 }, () => {
     // Verify package.json includes all module dependencies
     const pkgContent = await readFile(join(projectDir, 'package.json'), 'utf-8');
     const pkg = JSON.parse(pkgContent);
-    expect(pkg.dependencies).toHaveProperty('@a2a-js/server');
+    expect(pkg.dependencies).toHaveProperty('@a2a-js/sdk');
     expect(pkg.dependencies).toHaveProperty('express');
     expect(pkg.dependencies).toHaveProperty('@aws-sdk/client-bedrock-agentcore');
     expect(pkg.devDependencies).toHaveProperty('@types/express');
@@ -498,7 +612,7 @@ describe.skipIf(!nodeIsAtLeast20)(
       const pkgContent = await readFile(join(projectDir, 'package.json'), 'utf-8');
       const pkg = JSON.parse(pkgContent);
       expect(pkg.name).toBe(projectName);
-      expect(pkg.dependencies).not.toHaveProperty('@a2a-js/server');
+      expect(pkg.dependencies).not.toHaveProperty('@a2a-js/sdk');
       expect(pkg.dependencies).not.toHaveProperty('express');
 
       // Verify all 4 npm scripts are present

@@ -32,7 +32,7 @@ const MODULE_FILES: Record<ModuleName, string[]> = {
 const MODULE_DEPS: Record<ModuleName, string[]> = {
   memory: [],
   guardrails: [],
-  a2a: ['@a2a-js/server'],
+  a2a: ['@a2a-js/sdk', 'express', 'uuid'],
   agentcore: ['express', '@aws-sdk/client-bedrock-agentcore'],
 };
 
@@ -40,7 +40,7 @@ const MODULE_DEPS: Record<ModuleName, string[]> = {
 const MODULE_DEV_DEPS: Record<ModuleName, string[]> = {
   memory: [],
   guardrails: [],
-  a2a: [],
+  a2a: ['@types/express'],
   agentcore: ['@types/express'],
 };
 

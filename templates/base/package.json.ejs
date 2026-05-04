@@ -13,8 +13,10 @@
     "@strands-agents/sdk": "<%= strandsVersion %>",
     "zod": "^3.23.0",
     "dotenv": "^16.5.0"<% if (hasA2A) { %>,
-    "@a2a-js/server": "^0.1.0"<% } %><% if (hasAgentCore) { %>,
+    "@a2a-js/sdk": "^0.3.13",
     "express": "^4.21.0",
+    "uuid": "^11.1.0"<% } %><% if (hasAgentCore) { %>,<% if (!hasA2A) { %>
+    "express": "^4.21.0",<% } %>
     "@aws-sdk/client-bedrock-agentcore": "^3.700.0"<% } %>
   },
   "devDependencies": {
@@ -23,7 +25,7 @@
     "eslint": "^9.27.0",
     "@typescript-eslint/eslint-plugin": "^8.0.0",
     "@typescript-eslint/parser": "^8.0.0",
-    "tsx": "^4.19.0"<% if (hasAgentCore) { %>,
+    "tsx": "^4.19.0"<% if (hasA2A || hasAgentCore) { %>,
     "@types/express": "^5.0.0"<% } %>
   },
   "engines": {

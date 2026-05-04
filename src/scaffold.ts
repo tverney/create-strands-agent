@@ -22,7 +22,7 @@ import type {
 /**
  * Pinned version of the Strands Agents SDK used in generated projects.
  */
-const STRANDS_VERSION = '0.1.0';
+const STRANDS_VERSION = '1.0.0';
 
 /**
  * Minimum Node.js version required by generated projects.
