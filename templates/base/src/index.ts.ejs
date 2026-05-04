@@ -1,5 +1,6 @@
 import 'dotenv/config';
-import { Agent } from '@strands-agents/sdk';
+import { Agent, tool } from '@strands-agents/sdk';
+import z from 'zod';
 <% if (hasMemory) { %>import { memory } from './memory/index.js';
 <% } %><% if (hasGuardrails) { %>import { guardrails } from './guardrails/index.js';
 <% } %>
@@ -8,19 +9,53 @@ import { Agent } from '@strands-agents/sdk';
  *
  * This is the main entry point. Customize the agent's tools, model,
  * and system prompt below to build your AI agent.
+ *
+ * The SDK defaults to Amazon Bedrock with Claude Sonnet 4.6.
+ * Make sure your AWS credentials are configured (env vars, aws configure, or IAM role).
  */
 
-async function main(): Promise<void> {
-  const agent = new Agent({
-    // Add your tools here, e.g.:
-    // tools: [myTool],
-    systemPrompt: 'You are a helpful AI assistant.',<% if (hasMemory) { %>
-    memory,<% } %><% if (hasGuardrails) { %>
-    ...guardrails,<% } %>
-  });
+// ── Example Tool ────────────────────────────────────────────────────────────
+// Define custom tools using the `tool()` helper with Zod schemas.
+// Replace this with your own tools — see https://strandsagents.com/docs/
 
-  const result = await agent.invoke('Hello! What can you help me with?');
-  console.log(result);
-}
+const letterCounter = tool({
+  name: 'letter_counter',
+  description:
+    'Count occurrences of a specific letter in a word. Performs case-insensitive matching.',
+  inputSchema: z
+    .object({
+      word: z.string().describe('The input word to search in'),
+      letter: z.string().describe('The specific letter to count'),
+    })
+    .refine((data) => data.letter.length === 1, {
+      message: "The 'letter' parameter must be a single character",
+    }),
+  callback: (input: { word: string; letter: string }) => {
+    const { word, letter } = input;
+    const lowerWord = word.toLowerCase();
+    const lowerLetter = letter.toLowerCase();
+    let count = 0;
+    for (const char of lowerWord) {
+      if (char === lowerLetter) {
+        count++;
+      }
+    }
+    return `The letter '${letter}' appears ${count} time(s) in '${word}'`;
+  },
+});
 
-main().catch(console.error);
+// ── Agent Setup ─────────────────────────────────────────────────────────────
+
+const agent = new Agent({
+  tools: [letterCounter],
+  systemPrompt: 'You are a helpful AI assistant.',<% if (hasMemory) { %>
+  memory,<% } %><% if (hasGuardrails) { %>
+  ...guardrails,<% } %>
+});
+
+// ── Run ─────────────────────────────────────────────────────────────────────
+
+const result = await agent.invoke(
+  'Tell me how many letter R\'s are in the word "strawberry" 🍓',
+);
+console.log(result.lastMessage);

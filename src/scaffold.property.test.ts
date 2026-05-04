@@ -65,7 +65,6 @@ const BASE_ENV_VARS = [
   'AWS_REGION',
   'AWS_ACCESS_KEY_ID',
   'AWS_SECRET_ACCESS_KEY',
-  'STRANDS_MODEL_ID',
 ];
 
 /** Environment variables added by each module. */

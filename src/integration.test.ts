@@ -158,7 +158,7 @@ export interface AgentConfig {
 }
 export class Agent {
   constructor(config?: AgentConfig);
-  invoke(prompt: string): Promise<unknown>;
+  invoke(prompt: string): Promise<{ lastMessage: unknown }>;
 }
 export function tool(config: unknown): unknown;
 `,
@@ -169,9 +169,15 @@ export function tool(config: unknown): unknown;
     projectDir,
     'zod',
     `
-export function string(): unknown;
-export function object(shape: unknown): unknown;
-export function number(): unknown;
+interface ZodType {
+  describe(desc: string): ZodType;
+  refine(check: (data: any) => boolean, options?: unknown): ZodType;
+}
+declare function string(): ZodType;
+declare function object(shape: Record<string, unknown>): ZodType & { refine(check: (data: any) => boolean, options?: unknown): ZodType };
+declare function number(): ZodType;
+export { string, object, number };
+export default { string, object, number };
 `,
   );
 
