@@ -1,4 +1,4 @@
-# create-strands-agent
+# Scaffolding CLI for Strands Agents TypeScript projects
 
 Scaffold a production-ready [Strands Agents](https://strandsagents.com/) TypeScript project with one command.
 
